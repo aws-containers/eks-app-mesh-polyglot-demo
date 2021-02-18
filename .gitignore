@@ -1,0 +1,9 @@
+.DS_Store
+.idea/
+apps/.DS_Store
+apps/catalog_detail/.DS_Store
+apps/frontend_node/.DS_Store
+apps/product_catalog/.DS_Store
+apps/frontend_node/.idea/
+apps/frontend_node/public/.DS_Store
+deployment/.DS_Store

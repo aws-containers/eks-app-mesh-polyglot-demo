@@ -1,0 +1,167 @@
+---
+apiVersion: appmesh.k8s.aws/v1beta2
+kind: VirtualNode
+metadata:
+  name: prodcatalog
+  namespace: prodcatalog-ns
+spec:
+  podSelector:
+    matchLabels:
+      app: prodcatalog
+  listeners:
+    - portMapping:
+        port: 5000
+        protocol: http
+      healthCheck:
+        protocol: http
+        path: '/products/ping'
+        healthyThreshold: 2
+        unhealthyThreshold: 2
+        timeoutMillis: 2000
+        intervalMillis: 5000
+  backends:
+    - virtualService:
+        virtualServiceRef:
+          name: proddetail
+  serviceDiscovery:
+    dns:
+      hostname: prodcatalog.prodcatalog-ns.svc.cluster.local
+  logging:
+    accessLog:
+      file:
+        path: /dev/stdout
+---
+apiVersion: appmesh.k8s.aws/v1beta2
+kind: VirtualService
+metadata:
+  name: prodcatalog
+  namespace: prodcatalog-ns
+spec:
+  awsName: prodcatalog.prodcatalog-ns.svc.cluster.local
+  provider:
+    virtualRouter:
+      virtualRouterRef:
+        name: prodcatalog-router
+---
+apiVersion: appmesh.k8s.aws/v1beta2
+kind: VirtualService
+metadata:
+  name: proddetail
+  namespace: prodcatalog-ns
+spec:
+  awsName: proddetail.prodcatalog-ns.svc.cluster.local
+  provider:
+    virtualRouter:
+      virtualRouterRef:
+        name: proddetail-router
+---
+apiVersion: appmesh.k8s.aws/v1beta2
+kind: VirtualRouter
+metadata:
+  name: proddetail-router
+  namespace: prodcatalog-ns
+spec:
+  listeners:
+    - portMapping:
+        port: 3000
+        protocol: http
+  routes:
+    - name: proddetail-route
+      httpRoute:
+        match:
+          prefix: /
+        action:
+          weightedTargets:
+            - virtualNodeRef:
+                name: proddetail-v1
+              weight: 100
+---
+apiVersion: appmesh.k8s.aws/v1beta2
+kind: VirtualRouter
+metadata:
+  name: prodcatalog-router
+  namespace: prodcatalog-ns
+spec:
+  listeners:
+    - portMapping:
+        port: 5000
+        protocol: http
+  routes:
+    - name: prodcatalog-route
+      httpRoute:
+        match:
+          prefix: /
+        action:
+          weightedTargets:
+            - virtualNodeRef:
+                name: prodcatalog
+              weight: 100
+---
+apiVersion: appmesh.k8s.aws/v1beta2
+kind: VirtualNode
+metadata:
+  name: proddetail-v1
+  namespace: prodcatalog-ns
+spec:
+  podSelector:
+    matchLabels:
+      app: proddetail
+  listeners:
+    - portMapping:
+        port: 3000
+        protocol: http
+      healthCheck:
+        protocol: http
+        path: '/ping'
+        healthyThreshold: 2
+        unhealthyThreshold: 2
+        timeoutMillis: 2000
+        intervalMillis: 5000
+  serviceDiscovery:
+    dns:
+      hostname: proddetail.prodcatalog-ns.svc.cluster.local
+  logging:
+    accessLog:
+      file:
+        path: /dev/stdout
+---
+apiVersion: appmesh.k8s.aws/v1beta2
+kind: VirtualNode
+metadata:
+  name: frontend-node
+  namespace: prodcatalog-ns
+spec:
+  podSelector:
+    matchLabels:
+      app: frontend-node
+  listeners:
+    - portMapping:
+        port: 9000
+        protocol: http
+  backends:
+    - virtualService:
+        virtualServiceRef:
+          name: prodcatalog
+    - virtualService:
+        virtualServiceRef:
+          name: proddetail
+  serviceDiscovery:
+    dns:
+      hostname: frontend-node.prodcatalog-ns.svc.cluster.local
+  logging:
+    accessLog:
+      file:
+        path: /dev/stdout
+---
+apiVersion: appmesh.k8s.aws/v1beta2
+kind: VirtualService
+metadata:
+  name: frontend-node
+  namespace: prodcatalog-ns
+spec:
+  awsName: frontend-node.prodcatalog-ns.svc.cluster.local
+  provider:
+    virtualNode:
+      virtualNodeRef:
+        name: frontend-node
+---

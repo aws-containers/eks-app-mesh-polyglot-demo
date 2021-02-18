@@ -1,0 +1,19 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: prodcatalog-ns
+  labels:
+    mesh: prodcatalog-mesh
+    gateway: ingress-gw
+    appmesh.k8s.aws/sidecarInjectorWebhook: enabled
+---
+apiVersion: appmesh.k8s.aws/v1beta2
+kind: Mesh
+metadata:
+  name: prodcatalog-mesh
+spec:
+  namespaceSelector:
+    matchLabels:
+      mesh: prodcatalog-mesh
+---

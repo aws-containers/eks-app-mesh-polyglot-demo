@@ -1,0 +1,151 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-node
+  namespace: prodcatalog-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend-node
+  template:
+    metadata:
+      labels:
+        app: frontend-node
+    spec:
+      containers:
+        - name: frontend-node
+          image: "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/eks-app-mesh-demo/frontend_node:${APP_VERSION}"
+          imagePullPolicy: Always
+          env:
+            - name: BASE_URL
+              value: "http://prodcatalog.prodcatalog-ns.svc.cluster.local:5000/products/"
+          ports:
+            - containerPort: 9000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  #annotations:
+  # This annotation is only required if you are creating an internal facing ELB. Remove this annotation to create public facing ELB.
+  #service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+  name: frontend-node
+  namespace: prodcatalog-ns
+  labels:
+    app: frontend-node
+spec:
+  ports:
+    - name: "http"
+      port: 9000
+      targetPort: 9000
+  selector:
+    app: frontend-node
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proddetail
+  namespace: prodcatalog-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: proddetail
+  template:
+    metadata:
+      labels:
+        app: proddetail
+    spec:
+      containers:
+        - name: proddetail
+          image: "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/eks-app-mesh-demo/catalog_detail:${APP_VERSION}"
+          imagePullPolicy: Always
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 3000
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 3000
+            successThreshold: 3
+          ports:
+            - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  #annotations:
+  # This annotation is only required if you are creating an internal facing ELB. Remove this annotation to create public facing ELB.
+  #service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+  name: proddetail
+  namespace: prodcatalog-ns
+  labels:
+    app: proddetail
+spec:
+  ports:
+    - name: "http"
+      port: 3000
+      targetPort: 3000
+  selector:
+    app: proddetail
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prodcatalog
+  namespace: prodcatalog-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prodcatalog
+  template:
+    metadata:
+      labels:
+        app: prodcatalog
+    spec:
+      serviceAccountName: prodcatalog-sa
+      containers:
+        - name: prodcatalog
+          image: "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/eks-app-mesh-demo/product_catalog:${APP_VERSION}"
+          imagePullPolicy: Always
+          env:
+            - name: AGG_APP_URL
+              value: "http://proddetail.prodcatalog-ns.svc.cluster.local:3000/catalogDetail"
+          livenessProbe:
+            httpGet:
+              path: /products/ping
+              port: 5000
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /products/ping
+              port: 5000
+            successThreshold: 3
+          ports:
+            - containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prodcatalog
+  namespace: prodcatalog-ns
+  labels:
+    app: prodcatalog
+spec:
+  ports:
+    - name: "http"
+      port: 5000
+      targetPort: 5000
+  selector:
+    app: prodcatalog
+---

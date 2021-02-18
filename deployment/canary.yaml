@@ -1,0 +1,99 @@
+---
+apiVersion: appmesh.k8s.aws/v1beta2
+kind: VirtualNode
+metadata:
+  name: proddetail-v2
+  namespace: prodcatalog-ns
+spec:
+  podSelector:
+    matchLabels:
+      app: proddetail2
+  listeners:
+    - portMapping:
+        port: 3000
+        protocol: http
+      healthCheck:
+        protocol: http
+        path: '/ping'
+        healthyThreshold: 2
+        unhealthyThreshold: 2
+        timeoutMillis: 2000
+        intervalMillis: 5000
+  serviceDiscovery:
+    dns:
+      hostname: proddetail2.prodcatalog-ns.svc.cluster.local
+---
+apiVersion: appmesh.k8s.aws/v1beta2
+kind: VirtualRouter
+metadata:
+  name: proddetail-router
+  namespace: prodcatalog-ns
+spec:
+  listeners:
+    - portMapping:
+        port: 3000
+        protocol: http
+  routes:
+    - name: proddetail-route
+      httpRoute:
+        match:
+          prefix: /
+        action:
+          weightedTargets:
+            - virtualNodeRef:
+                name: proddetail-v1
+              weight: 50
+            - virtualNodeRef:
+                name: proddetail-v2
+              weight: 50
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proddetail2
+  namespace: prodcatalog-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: proddetail2
+  template:
+    metadata:
+      labels:
+        app: proddetail2
+    spec:
+      containers:
+        - name: proddetail
+          image: "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/eks-app-mesh-demo/catalog_detail:${APP_VERSION_2}"
+          imagePullPolicy: Always
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 3000
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 3000
+            successThreshold: 3
+          ports:
+            - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: proddetail2
+  namespace: prodcatalog-ns
+  labels:
+    app: proddetail2
+spec:
+  ports:
+    - name: "http"
+      port: 3000
+      targetPort: 3000
+  selector:
+    app: proddetail2
+---
