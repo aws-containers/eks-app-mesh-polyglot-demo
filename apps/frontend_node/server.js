@@ -3,9 +3,12 @@ const bodyParser= require('body-parser')
 const axios = require('axios')
 const app = express()
 const path = require("path");
+const Prometheus = require('prom-client')
 
 var AWSXRay = require('aws-xray-sdk');
 app.use(AWSXRay.express.openSegment('Frontend-Node'));
+
+Prometheus.collectDefaultMetrics();
 
 var baseProductUrl = process.env.BASE_URL;
 
@@ -62,6 +65,17 @@ app.post('/products', (req, res) => {
       })
 
 })
+
+app.get("/ping", (req, res, next) => {
+  res.json("Healthy")
+});
+
+// Export Prometheus metrics from /stats/prometheus endpoint
+app.get('/stats/prometheus', (req, res, next) => {
+  res.set('Content-Type', Prometheus.register.contentType)
+  res.end(Prometheus.register.metrics())
+})
+
 
 app.use(AWSXRay.express.closeSegment());
 

@@ -11,6 +11,9 @@ spec:
       app: frontend-node
   template:
     metadata:
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/path: '/stats/prometheus'
       labels:
         app: frontend-node
     spec:
@@ -18,6 +21,19 @@ spec:
         - name: frontend-node
           image: "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/eks-app-mesh-demo/frontend_node:${APP_VERSION}"
           imagePullPolicy: Always
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 9000
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 9000
+            successThreshold: 3
           env:
             - name: BASE_URL
               value: "http://prodcatalog.prodcatalog-ns.svc.cluster.local:5000/products/"
