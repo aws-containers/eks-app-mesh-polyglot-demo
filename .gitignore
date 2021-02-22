@@ -7,3 +7,7 @@ apps/product_catalog/.DS_Store
 apps/frontend_node/.idea/
 apps/frontend_node/public/.DS_Store
 deployment/.DS_Store
+apps/catalog_detail/node_modules/
+apps/catalog_detail/output.log
+apps/frontend_node/node_modules/
+apps/product_catalog/__pycache__/
