@@ -42,10 +42,10 @@ spec:
           weightedTargets:
             - virtualNodeRef:
                 name: proddetail-v1
-              weight: 50
+              weight: 90
             - virtualNodeRef:
                 name: proddetail-v2
-              weight: 50
+              weight: 10
 ---
 apiVersion: apps/v1
 kind: Deployment
