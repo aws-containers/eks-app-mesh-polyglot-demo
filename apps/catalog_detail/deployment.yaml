@@ -45,9 +45,11 @@ metadata:
   labels:
     app: proddetail
 spec:
+  type: NodePort
   ports:
     - name: "http"
       port: 3000
       targetPort: 3000
+      nodePort: 30036
   selector:
     app: proddetail
