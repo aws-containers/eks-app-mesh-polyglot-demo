@@ -6,8 +6,8 @@ replicaCount: 1
 namespace: detail
 
 image:
-  repository: "405710966773.dkr.ecr.us-east-2.amazonaws.com/eks-app-mesh-demo/catalog_detail:2.0"
-  tag: ""
+  repository: 405710966773.dkr.ecr.us-east-2.amazonaws.com/eks-app-mesh-demo/catalog_detail
+  tag: "2.0"
   pullPolicy: Always
 
 nameOverride: ""
