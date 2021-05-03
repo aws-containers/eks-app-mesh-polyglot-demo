@@ -17,6 +17,7 @@ spec:
       labels:
         app: frontend-node
     spec:
+      serviceAccountName: prodcatalog-envoy-proxies
       containers:
         - name: frontend-node
           image: "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/eks-app-mesh-demo/frontend_node:${APP_VERSION}"
@@ -73,6 +74,7 @@ spec:
       labels:
         app: proddetail
     spec:
+      serviceAccountName: prodcatalog-envoy-proxies
       containers:
         - name: proddetail
           image: "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/eks-app-mesh-demo/catalog_detail:${APP_VERSION}"
@@ -126,7 +128,7 @@ spec:
       labels:
         app: prodcatalog
     spec:
-      serviceAccountName: prodcatalog-sa
+      serviceAccountName: prodcatalog-envoy-proxies
       containers:
         - name: prodcatalog
           image: "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/eks-app-mesh-demo/product_catalog:${APP_VERSION}"

@@ -1,0 +1,29 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "appmesh:StreamAggregatedResources",
+                "appmesh:*",
+                "xray:*"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "acm:ExportCertificate",
+                "acm-pca:GetCertificateAuthorityCertificate"
+            ],
+            "Resource": "*"
+        },
+        {
+          "Action": [
+            "logs:*"
+          ],
+          "Effect": "Allow",
+          "Resource": "*"
+        }
+    ]
+}

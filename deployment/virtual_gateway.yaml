@@ -66,9 +66,12 @@ spec:
       labels:
         app: ingress-gw
     spec:
+      serviceAccountName: prodcatalog-envoy-proxies
+      securityContext:
+        fsGroup: 65534
       containers:
         - name: envoy
-          image: 840364872350.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-envoy:v1.15.1.0-prod
+          image: 840364872350.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-envoy:v1.17.2.0
           ports:
             - containerPort: 8088
 ---

@@ -62,6 +62,7 @@ spec:
       labels:
         app: proddetail2
     spec:
+      serviceAccountName: prodcatalog-envoy-proxies
       containers:
         - name: proddetail
           image: "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/eks-app-mesh-demo/catalog_detail:${APP_VERSION_2}"
