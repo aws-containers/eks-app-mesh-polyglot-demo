@@ -11,3 +11,15 @@ apps/catalog_detail/node_modules/
 apps/catalog_detail/output.log
 apps/frontend_node/node_modules/
 apps/product_catalog/__pycache__/
+workshop/apps/.DS_Store
+workshop/apps/catalog_detail/.DS_Store
+workshop/apps/frontend_node/.DS_Store
+workshop/apps/product_catalog/.DS_Store
+workshop/apps/frontend_node/.idea/
+workshop/apps/frontend_node/public/.DS_Store
+workshop/deployment/.DS_Store
+workshop/apps/catalog_detail/node_modules/
+workshop/apps/catalog_detail/output.log
+workshop/apps/frontend_node/node_modules/
+workshop/apps/product_catalog/__pycache__/
+workshop/apps/product_catalog/venv/

@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  {{ .Values.catalog.name }}
+  namespace: {{ .Values.catalog.namespace }}
+spec:
+  replicas: {{ .Values.catalog.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.catalog.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.catalog.name }}
+    spec:
+      containers:
+        - name: {{ .Values.catalog.name }}
+          image: "{{ .Values.catalog.image.repository }}:{{ .Values.catalog.image.tag }}"
+          imagePullPolicy: {{ .Values.catalog.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.catalog.service.targetPort }}
+              protocol: TCP
+          env:
+            {{- toYaml .Values.catalog.env | nindent 12 }}
+          resources:
+            {{- toYaml .Values.catalog.resources | nindent 12 }}
+      {{- with .Values.catalog.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.catalog.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.catalog.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
