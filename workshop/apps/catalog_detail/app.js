@@ -7,19 +7,47 @@ var XRay = require('aws-xray-sdk');
 var AWS = XRay.captureAWS(require('aws-sdk'));
 XRay.captureHTTPsGlobal(require('http'));
 var http = require('http');
+var os = require("os");
 
-app.use(XRay.express.openSegment('Product-Detail-V1'));
+var responseStatus = 200;
+
+app.use(XRay.express.openSegment('Product-Detail'));
 
 app.get("/catalogDetail", (req, res, next) => {
-  console.log("Catalog Detail Version 1 Get Request Successful");
-  res.json({
-             "version":"1",
-             "vendors":[ "ABC.com" ]
-              } )
+    res.status(responseStatus)
+    if (responseStatus == 200) {
+        console.log("Catalog Detail Get Request Successful");
+        res.json({
+                 "version":"1",
+                 "vendors":[ "ABC.com" ]
+                  } )
+    } else {
+        console.log("Catalog Detail Get Request has error 500");
+        res.json("Error")
+   }
 });
 
 app.get("/ping", (req, res, next) => {
-  res.json("Healthy")
+    res.status(responseStatus)
+    if (responseStatus == 200) {
+        res.json("Healthy")
+    } else {
+        console.log("Returning unhealthy");
+        res.json("UnHealthy")
+   }
+});
+
+app.get("/injectFault", (req, res, next) => {
+    console.log("host: " + os.hostname() + " will now respond with 500 error.");
+    responseStatus=500;
+    res.status(500);
+    next(new Error("host: " + os.hostname() + " will now respond with 500 error."));
+});
+
+app.get("/resetFault", (req, res, next) => {
+   console.log("Removed fault injection from host: " + os.hostname());
+   responseStatus=200;
+   res.json("Removed fault injection from host: " + os.hostname());
 });
 
 app.use(XRay.express.closeSegment());

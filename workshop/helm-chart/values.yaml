@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 detail:
-  replicaCount: 1
+  replicaCount: 2
   namespace: workshop
   name: proddetail
 
@@ -11,7 +11,7 @@ detail:
     repository: public.ecr.aws/u2g6w7p2/eks-workshop-demo/catalog_detail
     tag: "1.0"
     pullPolicy: Always
-
+  
   nameOverride: ""
   fullnameOverride: ""
 
@@ -32,6 +32,32 @@ detail:
     #  - secretName: chart-example-tls
     #    hosts:
     #      - chart-example.local
+
+  livenessProbe:
+    enabled: true
+    path: /ping
+    port: 3000
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 1
+    failureThreshold: 3
+    successThreshold: 1
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 3
+    timeoutSeconds: 1
+    failureThreshold: 3
+    successThreshold: 1
+  startupProbe:
+    enabled: false
+  #   port: 3000
+  #   path: /ping
+  #   initialDelaySeconds: 10
+  #   periodSeconds: 10
+  #   timeoutSeconds: 5
+  #   failureThreshold: 1
+  #   successThreshold: 1
 
   env:
     - name: AWS_XRAY_DAEMON_ADDRESS
@@ -86,6 +112,34 @@ catalog:
     #    hosts:
     #      - chart-example.local
 
+  livenessProbe:
+    enabled: true
+    path: /products/ping
+    port: 5000
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 1
+    failureThreshold: 3
+    successThreshold: 1
+  readinessProbe:
+    enabled: true
+    path: /products/ping
+    port: 5000
+    initialDelaySeconds: 5
+    periodSeconds: 3
+    timeoutSeconds: 1
+    failureThreshold: 3
+    successThreshold: 1
+  startupProbe:
+    enabled: false
+  #   port: 5000
+  #   path: /products/ping
+  #   initialDelaySeconds: 10
+  #   periodSeconds: 10
+  #   timeoutSeconds: 5
+  #   failureThreshold: 1
+  #   successThreshold: 1
+    
   env:
     - name: AGG_APP_URL
       value: "http://proddetail.workshop:3000/catalogDetail"
@@ -147,6 +201,34 @@ frontend:
     #    hosts:
     #      - chart-example.local
 
+  livenessProbe:
+    enabled: true
+    path: /ping
+    port: 9000
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 1
+    failureThreshold: 3
+    successThreshold: 1
+  readinessProbe:
+    enabled: true
+    path: /ping
+    port: 9000
+    initialDelaySeconds: 5
+    periodSeconds: 3
+    timeoutSeconds: 1
+    failureThreshold: 3
+    successThreshold: 1
+  startupProbe:
+    enabled: false
+  #   port: 9000
+  #   path: /ping
+  #   initialDelaySeconds: 10
+  #   periodSeconds: 10
+  #   timeoutSeconds: 5
+  #   failureThreshold: 1
+  #   successThreshold: 1
+    
   env:
     - name: BASE_URL
       value: "http://prodcatalog.workshop:5000/products/"

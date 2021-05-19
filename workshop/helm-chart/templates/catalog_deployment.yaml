@@ -21,6 +21,39 @@ spec:
             - name: http
               containerPort: {{ .Values.catalog.service.targetPort }}
               protocol: TCP
+          {{- if .Values.catalog.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.catalog.livenessProbe.path }}
+              port: {{ .Values.catalog.livenessProbe.port }}
+            initialDelaySeconds: {{ .Values.catalog.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.catalog.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.catalog.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.catalog.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.catalog.livenessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.catalog.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.catalog.readinessProbe.path }}
+              port: {{ .Values.catalog.readinessProbe.port }}
+            initialDelaySeconds: {{ .Values.catalog.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.catalog.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.catalog.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.catalog.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.catalog.readinessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.catalog.startupProbe.enabled }}
+          startupProbe:
+            httpGet:
+              path: {{ .Values.catalog.startupProbe.path }}
+              port: {{ .Values.catalog.startupProbe.port }}
+            initialDelaySeconds: {{ .Values.catalog.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.catalog.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.catalog.startupProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.catalog.startupProbe.successThreshold }}
+            failureThreshold: {{ .Values.catalog.startupProbe.failureThreshold }}
+          {{- end }}
           env:
             {{- toYaml .Values.catalog.env | nindent 12 }}
           resources:

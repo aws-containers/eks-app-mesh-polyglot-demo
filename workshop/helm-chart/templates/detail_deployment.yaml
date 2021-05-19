@@ -21,6 +21,36 @@ spec:
             - name: http
               containerPort: {{ .Values.detail.service.targetPort }}
               protocol: TCP
+          {{- if .Values.detail.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.detail.livenessProbe.path }}
+              port: {{ .Values.detail.livenessProbe.port }}
+            initialDelaySeconds: {{ .Values.detail.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.detail.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.detail.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.detail.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.detail.livenessProbe.failureThreshold }}
+          {{- end }}
+          readinessProbe:
+            exec:
+              command:
+                - /bin/bash
+                - -c
+                - cat readiness.txt | grep ready
+            initialDelaySeconds: 15
+            periodSeconds: 3
+          {{- if .Values.detail.startupProbe.enabled }}
+          startupProbe:
+            httpGet:
+              path: {{ .Values.detail.startupProbe.path }}
+              port: {{ .Values.detail.startupProbe.port }}
+            initialDelaySeconds: {{ .Values.detail.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.detail.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.detail.startupProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.detail.startupProbe.successThreshold }}
+            failureThreshold: {{ .Values.detail.startupProbe.failureThreshold }}
+          {{- end }}
           env:
             {{- toYaml .Values.detail.env | nindent 12 }}
           resources:

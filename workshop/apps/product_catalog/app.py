@@ -16,7 +16,7 @@ from aws_xray_sdk.core import patch_all
 patch_all()
 
 flask_app = Flask(__name__)
-flask_app.debug = True
+
 log_level = logging.INFO
 flask_app.logger.setLevel(log_level)
 # enable CORS

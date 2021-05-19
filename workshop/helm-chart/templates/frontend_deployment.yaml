@@ -24,6 +24,39 @@ spec:
             - name: http
               containerPort: {{ .Values.frontend.service.targetPort }}
               protocol: TCP
+          {{- if .Values.frontend.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.frontend.livenessProbe.path }}
+              port: {{ .Values.frontend.livenessProbe.port }}
+            initialDelaySeconds: {{ .Values.frontend.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.frontend.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.frontend.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.frontend.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.frontend.livenessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.frontend.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.frontend.readinessProbe.path }}
+              port: {{ .Values.frontend.readinessProbe.port }}
+            initialDelaySeconds: {{ .Values.frontend.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.frontend.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.frontend.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.frontend.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.frontend.readinessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.frontend.startupProbe.enabled }}
+          startupProbe:
+            httpGet:
+              path: {{ .Values.frontend.startupProbe.path }}
+              port: {{ .Values.frontend.startupProbe.port }}
+            initialDelaySeconds: {{ .Values.frontend.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.frontend.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.frontend.startupProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.frontend.startupProbe.successThreshold }}
+            failureThreshold: {{ .Values.frontend.startupProbe.failureThreshold }}
+          {{- end }}
           env:
             {{- toYaml .Values.frontend.env | nindent 12 }}
           resources:
