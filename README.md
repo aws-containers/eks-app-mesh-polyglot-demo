@@ -1,6 +1,6 @@
-This repository is used for many AWS workshops
+This repository is used for many AWS EKS workshops
 
-## Workshop on Polyglot Microservices in EKS
+## 1. Workshop on Polyglot Microservices in EKS
 
 ![fronteend](workshop/images/lbui.png)
 
@@ -38,7 +38,7 @@ You can add products and see the below details
 ![fronteend](workshop/images/addproducts.png)
 
 
-## Polyglot Microservices in App Mesh and EKS plus Fargate
+## 2. Workshop on Polyglot Microservices in App Mesh and EKS plus Fargate
 
 In this tutorial, we’ll walk you through the following, which are popular App Mesh use cases using the example of below Product Catalog Application deployment. For complete documentation checkout [Service Mesh using App Mesh](https://www.eksworkshop.com/advanced/330_servicemesh_using_appmesh/)
 
