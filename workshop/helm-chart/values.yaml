@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 detail:
-  replicaCount: 2
+  replicaCount: 1
   namespace: workshop
   name: proddetail
 
@@ -63,7 +63,11 @@ detail:
     - name: AWS_XRAY_DAEMON_ADDRESS
       value: xray-service.default:2000
       
-  resources: {}
+  resources:
+    limits:
+      cpu: 500m
+    requests:
+      cpu: 200m
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following
