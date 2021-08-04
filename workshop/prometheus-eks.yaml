@@ -171,8 +171,8 @@ data:
                 },
                 {
                   "source_labels": ["job"],
-                  "label_matcher": "frontend",
-                  "dimensions": [["ClusterName","Namespace"]],
+                  "label_matcher": "^frontend^",
+                  "dimensions": [["Namespace","ClusterName"]],
                   "metric_selectors": [
                     "^process_cpu_seconds_total$",
                     "^process_cpu_system_seconds_total$",
