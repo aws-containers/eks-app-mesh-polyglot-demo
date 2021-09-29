@@ -403,7 +403,7 @@ data:
       relabel_configs:
       - source_labels: [__address__]
         action: keep
-        regex: '.*:9000$'
+        regex: '.*:80$'
       - action: labelmap
         regex: __meta_kubernetes_pod_label_(.+)
       - action: replace
