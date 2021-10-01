@@ -171,7 +171,7 @@ data:
                 },
                 {
                   "source_labels": ["job"],
-                  "label_matcher": "^frontend^",
+                  "label_matcher": "^frontend$",
                   "dimensions": [["Namespace","ClusterName"]],
                   "metric_selectors": [
                     "^process_cpu_seconds_total$",
@@ -403,7 +403,7 @@ data:
       relabel_configs:
       - source_labels: [__address__]
         action: keep
-        regex: '.*:80$'
+        regex: '.*:9000$'
       - action: labelmap
         regex: __meta_kubernetes_pod_label_(.+)
       - action: replace
