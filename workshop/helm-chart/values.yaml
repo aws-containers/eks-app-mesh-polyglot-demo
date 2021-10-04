@@ -88,6 +88,8 @@ detail:
   affinity: {}
   
 catalog:
+  volume:
+    enabled: false
   replicaCount: 1
   namespace: workshop
   name: prodcatalog
