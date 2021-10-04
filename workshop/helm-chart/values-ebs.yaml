@@ -1,0 +1,6 @@
+catalog:
+  image:
+    tag: "4.10"
+  env:
+    - name: DATABASE_SERVICE_URL
+      value: mysql.workshop

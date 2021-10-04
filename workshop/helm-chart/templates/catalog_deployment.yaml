@@ -17,6 +17,11 @@ spec:
         - name: {{ .Values.catalog.name }}
           image: "{{ .Values.catalog.image.repository }}:{{ .Values.catalog.image.tag }}"
           imagePullPolicy: {{ .Values.catalog.image.pullPolicy }}
+          {{- if .Values.catalog.volume.enabled }}
+          volumeMounts:
+          - name: {{ .Values.catalog.volume.name }}
+            mountPath: {{ .Values.catalog.volume.path }}
+          {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.catalog.service.targetPort }}
@@ -58,6 +63,12 @@ spec:
             {{- toYaml .Values.catalog.env | nindent 12 }}
           resources:
             {{- toYaml .Values.catalog.resources | nindent 12 }}
+      {{- if .Values.catalog.volume.enabled }}
+      volumes:
+      - name: {{ .Values.catalog.volume.name }}
+        persistentVolumeClaim:
+          claimName: {{ .Values.catalog.volume.claim }}
+      {{- end }}
       {{- with .Values.catalog.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

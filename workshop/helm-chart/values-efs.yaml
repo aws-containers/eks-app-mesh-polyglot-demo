@@ -1,0 +1,9 @@
+catalog:
+  volume:
+    enabled: true
+    name: "efs-pvc"
+    path: "/products"
+    claim: "efs-storage-claim"
+    
+  image:
+    tag: "3.6"
