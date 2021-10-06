@@ -153,6 +153,8 @@ catalog:
       value: "http://proddetail.workshop:3000/catalogDetail"
     - name: AWS_XRAY_DAEMON_ADDRESS
       value: xray-service.default:2000
+    - name: DATABASE_SERVICE_URL
+      value: mysql.workshop
       
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
