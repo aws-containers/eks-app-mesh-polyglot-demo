@@ -13,7 +13,7 @@ import logging
 # xray_recorder.configure(context_missing='LOG_ERROR')
 # from aws_xray_sdk.core import patch_all
 import pymysql
-import pymysql.cursors
+from pymysql.err import DatabaseError
 import json
 
 #patch_all()
@@ -117,15 +117,14 @@ class Products(Resource):
                 "products": list_of_names,
                 "details" : detailsContent
             }
+            cursor.close()
+            connection.close()  
         except KeyError as e:
             flask_app.logger.error('Error 500 Could not retrieve information ' + e.__doc__ )
             name_space.abort(500, e.__doc__, status = "Could not retrieve information", statusCode = "500")
         except Exception as e:
             flask_app.logger.error('Error 400 Could not retrieve information ' + e.__doc__ )
             name_space.abort(400, e.__doc__, status = "Could not retrieve information", statusCode = "400")
-        finally:
-            cursor.close()
-            connection.close()
 
 @name_space.route('/ping')
 class Ping(Resource):
@@ -168,21 +167,26 @@ class MainClass(Resource):
             data = (id, request.json['name'])
             cursor.execute(sql, data)
             connection.commit()
-            
+            cursor.close()
+            connection.close()  
             flask_app.logger.info('Post Request succeeded ' + request.json['name'])
             return {
                 "status": "New Product added to Product Catalog",
                 "name": request.json['name']
             }
+        except DatabaseError as e:
+            err_code = e.args[0]
+            if err_code == 2003:
+                print('bad connection string')
+            else:
+                raise
         except KeyError as e:
             flask_app.logger.error('Error 500 Could not retrieve information ' + e.__doc__ )
             name_space.abort(500, e.__doc__, status = "Could not save information", statusCode = "500")
         except Exception as e:
             flask_app.logger.error('Error 400 Could not retrieve information ' + e.__doc__ )
             name_space.abort(400, e.__doc__, status = "Could not save information", statusCode = "400")
-        finally:
-            cursor.close()
-            connection.close()  
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True)
