@@ -124,6 +124,7 @@ class Products(Resource):
             flask_app.logger.error('Error 400 Could not retrieve information ' + e.__doc__ )
             name_space.abort(400, e.__doc__, status = "Could not retrieve information", statusCode = "400")
         finally:
+            cursor.close()
             connection.close()
 
 @name_space.route('/ping')
@@ -180,6 +181,7 @@ class MainClass(Resource):
             flask_app.logger.error('Error 400 Could not retrieve information ' + e.__doc__ )
             name_space.abort(400, e.__doc__, status = "Could not save information", statusCode = "400")
         finally:
+            cursor.close()
             connection.close()  
 
 if __name__ == '__main__':
