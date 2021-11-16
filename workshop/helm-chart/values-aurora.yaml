@@ -89,7 +89,8 @@ detail:
   
 catalog:
   serviceAccountName:
-    enabled: false
+    enabled: true
+    name: aurora-irsa
   volume:
     enabled: false
   replicaCount: 1
@@ -98,7 +99,7 @@ catalog:
 
   image:
     repository: public.ecr.aws/u2g6w7p2/eks-workshop-demo/product_catalog
-    tag: "1.0"
+    tag: "9.2"
     pullPolicy: Always
 
   nameOverride: ""
@@ -156,7 +157,15 @@ catalog:
     - name: AWS_XRAY_DAEMON_ADDRESS
       value: xray-service.default:2000
     - name: DATABASE_SERVICE_URL
-      value: mysql.workshop
+      value: "aurora-db.cluster-cfyjlrgdo1gs.us-west-2.rds.amazonaws.com"
+    - name: DATABASE_USER_NAME
+      value: "workshop_user"
+    - name: DB_NAME
+      value: "dev"
+    - name: DB_PORT
+      value: "3306"
+    - name: DB_REGION
+      value: "us-west-2"
       
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious

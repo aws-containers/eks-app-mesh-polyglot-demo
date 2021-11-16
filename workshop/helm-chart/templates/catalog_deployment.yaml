@@ -13,6 +13,9 @@ spec:
       labels:
         app: {{ .Values.catalog.name }}
     spec:
+      {{- if .Values.catalog.serviceAccountName.enabled }}
+      serviceAccountName: {{ .Values.catalog.serviceAccountName.name }}
+      {{- end }}
       containers:
         - name: {{ .Values.catalog.name }}
           image: "{{ .Values.catalog.image.repository }}:{{ .Values.catalog.image.tag }}"
@@ -20,7 +23,7 @@ spec:
           {{- if .Values.catalog.volume.enabled }}
           volumeMounts:
           - name: {{ .Values.catalog.volume.name }}
-            mountPath: {{ .Values.catalog.volume.path }}
+            mountPath: {{ .Values.catalog.volume.path }}.
           {{- end }}
           ports:
             - name: http
