@@ -99,7 +99,7 @@ catalog:
 
   image:
     repository: public.ecr.aws/u2g6w7p2/eks-workshop-demo/product_catalog
-    tag: "9.2"
+    tag: "9.3"
     pullPolicy: Always
 
   nameOverride: ""
@@ -157,7 +157,7 @@ catalog:
     - name: AWS_XRAY_DAEMON_ADDRESS
       value: xray-service.default:2000
     - name: DATABASE_SERVICE_URL
-      value: "aurora-db.cluster-cfyjlrgdo1gs.us-west-2.rds.amazonaws.com"
+      value: "aa5ewkpw20g7y2.ca1awxvq6zb1.us-east-1.rds.amazonaws.com"
     - name: DATABASE_USER_NAME
       value: "workshop_user"
     - name: DB_NAME
@@ -165,7 +165,7 @@ catalog:
     - name: DB_PORT
       value: "3306"
     - name: DB_REGION
-      value: "us-west-2"
+      value: "us-east-1"
       
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
