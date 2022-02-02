@@ -62,15 +62,12 @@ flask_app.logger.info(SSL_CA)
 #gets the credentials from .aws/credentials
 client = boto3.client('rds')
 
-token = client.generate_db_auth_token(DBHostname=DB_APP_URL, Port=3306, DBUsername=DB_USER_NAME, Region=DB_REGION)
-
-flask_app.logger.info('token ' + token)
-
-# Construct SSL
-ssl = {'ca': 'rds-combined-ca-bundle.pem'}
-
 # Connect to the database
 def create_connection():
+    # Construct SSL
+    ssl = {'ca': 'rds-combined-ca-bundle.pem'}
+    token = client.generate_db_auth_token(DBHostname=DB_APP_URL, Port=3306, DBUsername=DB_USER_NAME, Region=DB_REGION)
+    flask_app.logger.info('token ' + token)
     return pymysql.connect(host=DB_APP_URL,
                              user=DB_USER_NAME,
                              password=token,
