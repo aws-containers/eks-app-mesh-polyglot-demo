@@ -23,7 +23,7 @@ spec:
           {{- if .Values.catalog.volume.enabled }}
           volumeMounts:
           - name: {{ .Values.catalog.volume.name }}
-            mountPath: {{ .Values.catalog.volume.path }}.
+            mountPath: {{ .Values.catalog.volume.path }}
           {{- end }}
           ports:
             - name: http
