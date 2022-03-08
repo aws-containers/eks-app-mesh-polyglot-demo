@@ -3,8 +3,6 @@ kind: Service
 metadata:
   name: {{ .Values.frontend.name }}
   namespace: {{ .Values.frontend.namespace }}
-  annotations:
-    service.beta.kubernetes.io/aws-load-balancer-type: {{ .Values.frontend.lbType }}
   labels:
     app: {{ .Values.frontend.name }}
 spec:
