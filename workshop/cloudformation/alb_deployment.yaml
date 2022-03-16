@@ -1,0 +1,68 @@
+Description: 
+  This template deploys an Application Load Balancer, associates it with a security group, creates a listener and also a target Group and associate them with the load balancer
+
+Parameters:
+  VPC:
+    Type: AWS::EC2::VPC::Id
+    Description: Choose which VPC the Application Load Balancer should be deployed to
+
+  Subnets:
+    Description: Choose which subnets the Application Load Balancer should be deployed to
+    Type: List<AWS::EC2::Subnet::Id>
+
+Resources:
+
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: eksworkshopalbsg
+      GroupDescription: CF Created ALB Security Group
+      VpcId: !Ref VPC
+      Tags: [
+      {"Key": "Name", "Value": "eksworkshopalbsg"},
+      ]
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: eksworkshopalb
+      Subnets: !Ref Subnets
+      SecurityGroups:
+        - !Ref SecurityGroup
+      Tags:
+        - Key: Name
+          Value: eksworkshop
+
+  LoadBalancerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
+
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: eksworkshoptg
+      TargetType: ip
+      VpcId: !Ref VPC
+      Port: 80
+      Protocol: HTTP
+
+Outputs:
+
+  LoadBalancerDNSName:
+    Description: A reference to the LoadBalancer DNS Name
+    Value: !GetAtt LoadBalancer.DNSName
+
+  TargetGroupARN:
+    Description: A reference to the TargetGroup ARN Value
+    Value: !Ref TargetGroup
