@@ -3,20 +3,24 @@ Description:
 
 Parameters:
   VPC:
+    Description: Choose which VPC the Application Load Balancer should be deployed in
     Type: AWS::EC2::VPC::Id
-    Description: Choose which VPC the Application Load Balancer should be deployed to
 
   Subnets:
     Description: Choose which subnets the Application Load Balancer should be deployed to
     Type: List<AWS::EC2::Subnet::Id>
+  
+  NodeSecurityGroup:
+    Description : Choose the Security Group Name of the Worker Nodes (eks-cluster-sg-eksworkshop-eksctl-xxxxx)
+    Type: AWS::EC2::SecurityGroup::Id
 
 Resources:
 
-  SecurityGroup:
+  ALBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupName: eksworkshopalbsg
-      GroupDescription: CF Created ALB Security Group
+      GroupDescription: ALB Security Group created by CloudFormation
       VpcId: !Ref VPC
       Tags: [
       {"Key": "Name", "Value": "eksworkshopalbsg"},
@@ -26,6 +30,16 @@ Resources:
         FromPort: 80
         ToPort: 80
         CidrIp: 0.0.0.0/0
+  
+  NodeSecurityGroupIngressRule : 
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties: 
+      Description: Rule to allow traffic from ALB to the TestApp Pods
+      GroupId: !Ref NodeSecurityGroup
+      IpProtocol: TCP
+      SourceSecurityGroupId: !Ref ALBSecurityGroup
+      FromPort: 80
+      ToPort: 80
 
   LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
@@ -33,7 +47,7 @@ Resources:
       Name: eksworkshopalb
       Subnets: !Ref Subnets
       SecurityGroups:
-        - !Ref SecurityGroup
+        - !Ref ALBSecurityGroup
       Tags:
         - Key: Name
           Value: eksworkshop
