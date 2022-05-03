@@ -99,7 +99,7 @@ catalog:
 
   image:
     repository: public.ecr.aws/u2g6w7p2/eks-workshop-demo/product_catalog
-    tag: "9.3"
+    tag: "9.6"
     pullPolicy: Always
 
   nameOverride: ""
@@ -157,7 +157,7 @@ catalog:
     - name: AWS_XRAY_DAEMON_ADDRESS
       value: xray-service.default:2000
     - name: DATABASE_SERVICE_URL
-      value: "aa5ewkpw20g7y2.ca1awxvq6zb1.us-east-1.rds.amazonaws.com"
+      value: "aa1hp57haoolya5.ch6gefdqblln.us-east-1.rds.amazonaws.com"
     - name: DATABASE_USER_NAME
       value: "workshop_user"
     - name: DB_NAME
