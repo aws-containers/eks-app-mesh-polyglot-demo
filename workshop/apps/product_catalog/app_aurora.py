@@ -8,17 +8,11 @@ from flask_cors import CORS
 import requests
 import os
 import logging
-from aws_xray_sdk.core import xray_recorder
-from aws_xray_sdk.ext.flask.middleware import XRayMiddleware
-xray_recorder.configure(context_missing='LOG_ERROR')
-from aws_xray_sdk.core import patch_all
 import pymysql
 from pymysql.err import DatabaseError
 import json
 import sys
 import boto3
-
-patch_all()
 
 flask_app = Flask(__name__)
 
@@ -26,10 +20,6 @@ log_level = logging.INFO
 flask_app.logger.setLevel(log_level)
 # enable CORS
 CORS(flask_app, resources={r'/*': {'origins': '*'}})
-
-#configure SDK code
-xray_recorder.configure(service='Product-Catalog')
-XRayMiddleware(flask_app, xray_recorder)
 
 
 AGG_APP_URL = os.environ.get("AGG_APP_URL")
