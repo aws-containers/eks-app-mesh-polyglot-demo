@@ -71,7 +71,7 @@ spec:
         fsGroup: 65534
       containers:
         - name: envoy
-          image: 840364872350.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-envoy:v1.17.2.0
+          image: ${ENVOY_IMAGE}
           ports:
             - containerPort: 8088
 ---
