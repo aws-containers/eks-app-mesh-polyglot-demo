@@ -1,0 +1,85 @@
+apiVersion: spinnaker.io/v1alpha2
+kind: SpinnakerService
+metadata:
+  name: spinnaker
+spec:
+  spinnakerConfig:
+    config:
+      version: $SPINNAKER_VERSION   # the version of Spinnaker to be deployed
+      persistentStorage:
+        persistentStoreType: s3
+        s3:
+          bucket: $S3_BUCKET
+          rootFolder: front50
+          region: $AWS_REGION
+      deploymentEnvironment:
+        sidecars:
+          spin-clouddriver:
+          - name: token-refresh
+            dockerImage: quay.io/skuid/ecr-token-refresh:latest
+            mountPath: /etc/passwords
+            configMapVolumeMounts:
+            - configMapName: token-refresh-config
+              mountPath: /opt/config/ecr-token-refresh
+      features:
+        artifacts: true
+      artifacts:
+        github:
+          enabled: true
+          accounts:
+          - name: $GITHUB_USER
+            token: $GITHUB_TOKEN  # GitHub's personal access token. This fields supports `encrypted` references to secrets.
+      providers:
+            dockerRegistry:
+              enabled: true
+            kubernetes:
+              enabled: true
+              accounts:
+              - name: spinnaker-workshop
+                requiredGroupMembership: []
+                providerVersion: V2
+                permissions:
+                dockerRegistries:
+                  - accountName: my-ecr-registry
+                configureImagePullSecrets: true
+                cacheThreads: 1
+                namespaces: [spinnaker,workshop]
+                omitNamespaces: []
+                kinds: []
+                omitKinds: []
+                customResources: []
+                cachingPolicies: []
+                oAuthScopes: []
+                onlySpinnakerManaged: false
+                kubeconfigFile: kubeconfig-sp  # File name must match "files" key
+              primaryAccount: spinnaker-workshop  # Change to a desired account from the accounts array
+    files: 
+        kubeconfig-sp: |
+            <REPLACE_ME_WITH_FILE_CONTENT>
+    profiles:
+        clouddriver:
+          dockerRegistry:
+            enabled: true
+            primaryAccount: my-ecr-registry
+            accounts:
+            - name: my-ecr-registry
+              address: https://$ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+              username: AWS
+              passwordFile: /etc/passwords/my-ecr-registry.pass
+              trackDigests: true
+              repositories:
+              - $ECR_REPOSITORY
+        igor:
+          docker-registry:
+            enabled: true
+    service-settings:
+      front50:
+        kubernetes:
+          serviceAccountName: $S3_SERVICE_ACCOUNT
+          securityContext:
+            fsGroup: 100
+  # spec.expose - This section defines how Spinnaker should be publicly exposed
+  expose:
+    type: service  # Kubernetes LoadBalancer type (service/ingress), note: only "service" is supported for now
+    service:
+      type: LoadBalancer
