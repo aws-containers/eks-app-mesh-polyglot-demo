@@ -252,7 +252,7 @@ modify_spinnakerservice_file() { # CREATING  Manifest File For Spinnaker Service
     ADDRESS=${ADDRESS} yq -i '.spec.spinnakerConfig.profiles.clouddriver.dockerRegistry.accounts[0].address = env(ADDRESS)' deploy/spinnaker/basic/spinnakerservice.yml
     S3_SERVICE_ACCOUNT=${S3_SERVICE_ACCOUNT} yq -i '.spec.spinnakerConfig.service-settings.front50.kubernetes.serviceAccountName = env(S3_SERVICE_ACCOUNT)' deploy/spinnaker/basic/spinnakerservice.yml
     cp ${HOME}/Kubeconfig-ws-sa ~/environment/eks-app-mesh-polyglot-demo/workshop/spinnaker/test.yml
-    yq eval-all -I 4 'select(fileIndex==0).spec.spinnakerConfig.files.kubeconfig-sp = select(fileIndex==1) | select(fileIndex==0)' -i  deploy/spinnaker/basic/spinnakerservice.yml ~/environment/test.yml  
+    yq eval-all -I 4 'select(fileIndex==0).spec.spinnakerConfig.files.kubeconfig-sp = select(fileIndex==1) | select(fileIndex==0)' -i  deploy/spinnaker/basic/spinnakerservice.yml ~/environment/eks-app-mesh-polyglot-demo/workshop/spinnaker/test.yml  
     sed -i "s/kubeconfig-sp:/kubeconfig-sp: |/g" deploy/spinnaker/basic/spinnakerservice.yml
     rm ~/environment/eks-app-mesh-polyglot-demo/workshop/spinnaker/test.yml
 }
