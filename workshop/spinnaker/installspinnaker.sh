@@ -413,7 +413,9 @@ clean_up() { #DELETE THE RESOURCES
         printf "${IGREEN}ECR Repository already deleted${COLOR_OFF}\n"
     fi
     
-    echo "Clean UP Completed"
+    trap - EXIT
+    echo "++++++++++++++++++++++++++++++++++++++++++++"
+    printf "${IGREEN}Clean UP Completed${COLOR_OFF}\n"
 
 
     
