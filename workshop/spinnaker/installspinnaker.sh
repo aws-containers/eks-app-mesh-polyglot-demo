@@ -112,8 +112,9 @@ install_spinnaker_operator(){ # INSTALLING Spinaker Operator
         	echo "Waiting for pods to come up"
         fi	
         total_time=`expr ${total_time} + 10`
-        if [ ${total_time} -gt 400 ]; then
-            printf "${BRED}Something is wrong, Pods don't take this mush time${COLOR_OFF}\n"
+        if [ ${total_time} -gt 200 ]; then
+            printf "${BRED}Something is wrong, Pods don't take this much time${COLOR_OFF}\n"
+            exit
         fi
     done
     
