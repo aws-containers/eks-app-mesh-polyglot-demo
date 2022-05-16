@@ -12,6 +12,13 @@ ECR_REPOSITORY=eks-workshop-demo/test-detail
 APP_VERSION=1.0
 ADDRESS=https://$ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
 
+exit_trap () {
+  local lc="$BASH_COMMAND" rc=$?
+  echo "Command [$lc] exited with code [$rc]"
+}
+
+trap exit_trap EXIT
+
 usage() {
     
     filename=$(basename $BASH_SOURCE)
@@ -37,6 +44,8 @@ wget https://github.com/mikefarah/yq/releases/download/${VERSION}/${BINARY}.tar.
 
 config() { # GET User Input
     
+    printf "${BRED}Spinnaker Operator Version and Spinnaker Release Version should be like 1.2.5 1.26.6 NOT LIKE v1.2.1${COLOR_OFF}\n"
+    
     read -p "Spinaker operator Version from https://github.com/armory/spinnaker-operator/releases for versions : " SPINNAKER_OPERATOR_VERSION
     
     read -p "Spinnaker release from https://spinnaker.io/community/releases/versions/:  " SPINNAKER_VERSION
@@ -44,6 +53,12 @@ config() { # GET User Input
     read -p "Git hub account user name: " GITHUB_USER
     
     read -p "Git hub token: " -s GITHUB_TOKEN
+    
+    if [[ ${SPINNAKER_OPERATOR_VERSION} =~ ^[vV]  || ${SPINNAKER_VERSION} =~ ^[vV] ]]; then
+        
+        printf "\n${BRED}Version Number should only have Numbers ${COLOR_OFF} \n"
+        exit
+    fi
     
     echo " 
 
@@ -81,9 +96,27 @@ install_spinnaker_operator(){ # INSTALLING Spinaker Operator
     kubectl -n spinnaker-operator apply -f deploy/operator/cluster
     
     echo "Waiting for pods to come up, It takes 2-3 Mins"
-    sleep 180
+    sleep 30
+    first_field=$(kubectl get pod -n spinnaker-operator|grep -i spinnaker-op|awk '{print $2}'|cut -d "/" -f1)
+    second_field=$(kubectl get pod -n spinnaker-operator|grep -i spinnaker-op|awk '{print $2}'|cut -d "/" -f2)
+    status=$(kubectl get pod -n spinnaker-operator|grep -i spinnaker-op|awk '{print $3}')
+    PODS_RUNNING="false"
+    total_time=30
+    while [ ${PODS_RUNNING} == "false" ]; do 
+        sleep 10
+    	echo "Checking if pods is running"
+        if [ ${first_field} == ${second_field} ] && [ ${status} == "Running" ]; then 
+               	echo "Pods are running"
+               	PODS_RUNNING="true"
+        else
+        	echo "Waiting for pods to come up"
+        fi	
+        total_time=`expr ${total_time} + 10`
+        if [ ${total_time} -gt 400 ]; then
+            printf "${BRED}Something is wrong, Pods don't take this mush time${COLOR_OFF}\n"
+        fi
+    done
     
-    echo "Checking if pods is running"
     
     kubectl get pod -n spinnaker-operator
 }
@@ -96,12 +129,22 @@ create_s3() { # CREATING S3 Bucket
     sleep 5
     
     export S3_BUCKET=spinnaker-workshop-$(cat /dev/urandom | LC_ALL=C tr -dc "[:alpha:]" | tr '[:upper:]' '[:lower:]' | head -c 10)
-    aws s3 mb s3://${S3_BUCKET}
-    aws s3api put-public-access-block \
-    --bucket ${S3_BUCKET} \
-    --public-access-block-configuration "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
+    aws s3api head-bucket --bucket ${S3_BUCKET} >/dev/null 2>&1
+    if [[ $? != 0  ]]; then
+        
+        printf "Bucket Doesnot Exists Creating one \n"
+        aws s3 mb s3://${S3_BUCKET}
     
-    echo "S3 Bucket Name: ${S3_BUCKET}"
+        aws s3api put-public-access-block \
+        --bucket ${S3_BUCKET} \
+        --public-access-block-configuration "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
+        
+        echo "S3 Bucket Name: ${S3_BUCKET}"
+        echo "S3_BUCKET_NAME=${S3_BUCKET}" > /tmp/tempconfig.log
+    else
+        printf "Bucket ${S3_BUCKET} already exits choose another name"
+        exit
+    fi
 
 }
 
@@ -158,11 +201,13 @@ create_ecr_repository() { # CREATING ECR Repository
     export APP_VERSION=1.0
     aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
     aws ecr describe-repositories --repository-name $ECR_REPOSITORY >/dev/null 2>&1
-    aws ecr create-repository --repository-name $ECR_REPOSITORY >/dev/null
+    if [ $? != 0 ]; then
+        aws ecr create-repository --repository-name $ECR_REPOSITORY >/dev/null
+    fi
+    echo "ECR_REPOSITORY_NAME=${ECR_REPOSITORY}" > /tmp/tempconfig.log
     TARGET=$ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$APP_VERSION
     docker build -t $TARGET apps/catalog_detail
     docker push $TARGET
-
 }
 
 
@@ -313,29 +358,61 @@ clean_up() { #DELETE THE RESOURCES
         kubectl delete crd $i
     done
     
+    
     cluster_name=$(eksctl get cluster|grep -i eksworkshop|awk '{print $1}')
+    
     
     eksctl delete iamserviceaccount \
     --name s3-access-sa \
     --namespace spinnaker \
     --cluster ${cluster_name} 
     
-    kubectl delete ns spinnaker-operator
+    for namespace in $(kubectl get ns |grep -i spinnaker|awk '{print $1}'); do
+        printf "${IGREEN}Deleting Namespace ${namespace} ${COLOR_OFF}\n"
+        kubectl delete ns ${namespace}
+    done
     
-    kubectl delete ns spinnaker
-    
-    
-    cd ~/environment
-    rm config.yaml
-    
-    rm -rf spinnaker-tools
-    rm -rf spinnaker-operator
     
     cd ~/environment
-    git clone https://github.com/aws-containers/eks-app-mesh-polyglot-demo.git
+    if [ -f config.yaml ]; then
+        printf "${IGREEN}Deleting file config.yaml${COLOR_OFF}\n"
+        rm config.yaml
+    fi
     
-    cd ~/environment/eks-app-mesh-polyglot-demo
-    helm upgrade --reuse-values -f ~/environment/eks-app-mesh-polyglot-demo/workshop/helm-chart/values.yaml workshop workshop/helm-chart/
+    if [ -d spinnaker-tools ]; then 
+        printf "${IGREEN}Deleting Spinnaker-tools Folder ${COLOR_OFF}\n"
+        rm -rf spinnaker-tools
+    fi 
+    
+    if [ -d spinnaker-operator ]; then 
+        printf "${IGREEN}Deleting Spinnaker-operator Folder ${COLOR_OFF}\n"
+        rm -rf spinnaker-operator
+    fi 
+    
+    BUCKET_NAME=$(cat /tmp/tempconfig.log|grep -i S3_BUCKET_NAME| cut -d "=" -f2)
+    aws s3api head-bucket --bucket ${S3_BUCKET} >/dev/null 2>&1
+    if [ $? = 0 ]; then
+        printf "${IGREEN}Deleting S3 Bucket: ${BUCKET_NAME}${COLOR_OFF}\n"
+        aws s3 rb s3://${BUCKET_NAME} --force  
+    else
+        printf "${IGREEN}S3 Bucket ${BUCKET_NAME} already deleted${COLOR_OFF}\n"
+    fi
+   
+    printf "Delete ECR Repository \n"
+    
+    ECR_REPOSITORY_NAME=$(cat /tmp/tempconfig.log|grep -i ECR_REPOSITORY_NAME| cut -d "=" -f2)
+     aws ecr describe-repositories --repository-name $ECR_REPOSITORY >/dev/null 2>&1
+   
+    if [ $? = 0 ]; then
+        
+        printf "${IGREEN}Deleting ECR Repository: ${ECR_REPOSITORY_NAME}${COLOR_OFF}\n"
+        aws ecr delete-repository --repository-name ${ECR_REPOSITORY_NAME} --force
+       
+    else
+        printf "${IGREEN}ECR Repository already deleted${COLOR_OFF}\n"
+    fi
+    
+    echo "Clean UP Completed"
 
 
     
