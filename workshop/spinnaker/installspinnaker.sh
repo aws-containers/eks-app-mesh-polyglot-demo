@@ -38,13 +38,19 @@ BINARY="yq_linux_amd64"
 
 wget https://github.com/mikefarah/yq/releases/download/${VERSION}/${BINARY}.tar.gz -O - |\
   tar xz && sudo mv ${BINARY} /usr/bin/yq
+  
+if [ $? != 0 ]; then
+    
+    printf "${BRED}Yq is not installed, Make sure Version of Yq is correct"
+    exit
+fi
 
 }
 
 
 config() { # GET User Input
     
-    printf "${BRED}Spinnaker Operator Version and Spinnaker Release Version should be like 1.2.5 1.26.6 NOT LIKE v1.2.1${COLOR_OFF}\n"
+    printf "${BRED}Spinnaker Operator Version and Spinnaker Release Version should be like 1.2.5 1.26.6 NOT LIKE v1.2.5${COLOR_OFF}\n"
     
     read -p "Spinaker operator Version from https://github.com/armory/spinnaker-operator/releases for versions : " SPINNAKER_OPERATOR_VERSION
     
@@ -97,14 +103,14 @@ install_spinnaker_operator(){ # INSTALLING Spinaker Operator
     
     echo "Waiting for pods to come up, It takes 2-3 Mins"
     sleep 30
-    first_field=$(kubectl get pod -n spinnaker-operator|grep -i spinnaker-op|awk '{print $2}'|cut -d "/" -f1)
-    second_field=$(kubectl get pod -n spinnaker-operator|grep -i spinnaker-op|awk '{print $2}'|cut -d "/" -f2)
-    status=$(kubectl get pod -n spinnaker-operator|grep -i spinnaker-op|awk '{print $3}')
     PODS_RUNNING="false"
     total_time=30
-    while [ ${PODS_RUNNING} == "false" ]; do 
+    while [ ${PODS_RUNNING} == "false" ]; do
+        first_field=$(kubectl get pod -n spinnaker-operator|grep -i spinnaker-op|awk '{print $2}'|cut -d "/" -f1)
+        second_field=$(kubectl get pod -n spinnaker-operator|grep -i spinnaker-op|awk '{print $2}'|cut -d "/" -f2)
+        status=$(kubectl get pod -n spinnaker-operator|grep -i spinnaker-op|awk '{print $3}')
         sleep 10
-    	echo "Checking if pods is running"
+    	echo "Checking if pods are running"
         if [ ${first_field} == ${second_field} ] && [ ${status} == "Running" ]; then 
                	echo "Pods are running"
                	PODS_RUNNING="true"
@@ -114,6 +120,7 @@ install_spinnaker_operator(){ # INSTALLING Spinaker Operator
         total_time=`expr ${total_time} + 10`
         if [ ${total_time} -gt 200 ]; then
             printf "${BRED}Something is wrong, Pods don't take this much time${COLOR_OFF}\n"
+            printf "${BRED}Check if the Version number is correct${COLOR_OFF}\n"
             exit
         fi
     done
@@ -390,27 +397,31 @@ clean_up() { #DELETE THE RESOURCES
         rm -rf spinnaker-operator
     fi 
     
-    BUCKET_NAME=$(cat /tmp/tempconfig.log|grep -i S3_BUCKET_NAME| cut -d "=" -f2)
-    aws s3api head-bucket --bucket ${S3_BUCKET} >/dev/null 2>&1
-    if [ $? = 0 ]; then
-        printf "${IGREEN}Deleting S3 Bucket: ${BUCKET_NAME}${COLOR_OFF}\n"
-        aws s3 rb s3://${BUCKET_NAME} --force  
-    else
-        printf "${IGREEN}S3 Bucket ${BUCKET_NAME} already deleted${COLOR_OFF}\n"
-    fi
-   
-    printf "Delete ECR Repository \n"
+    if [ -f /tmp/tempconfig.log ]; then
     
-    ECR_REPOSITORY_NAME=$(cat /tmp/tempconfig.log|grep -i ECR_REPOSITORY_NAME| cut -d "=" -f2)
-     aws ecr describe-repositories --repository-name $ECR_REPOSITORY >/dev/null 2>&1
-   
-    if [ $? = 0 ]; then
-        
-        printf "${IGREEN}Deleting ECR Repository: ${ECR_REPOSITORY_NAME}${COLOR_OFF}\n"
-        aws ecr delete-repository --repository-name ${ECR_REPOSITORY_NAME} --force
+        BUCKET_NAME=$(cat /tmp/tempconfig.log|grep -i S3_BUCKET_NAME| cut -d "=" -f2)
+        aws s3api head-bucket --bucket ${S3_BUCKET} >/dev/null 2>&1
+        if [ $? = 0 ]; then
+            printf "${IGREEN}Deleting S3 Bucket: ${BUCKET_NAME}${COLOR_OFF}\n"
+            aws s3 rb s3://${BUCKET_NAME} --force  
+        else
+            printf "${IGREEN}S3 Bucket ${BUCKET_NAME} already deleted${COLOR_OFF}\n"
+        fi
        
-    else
-        printf "${IGREEN}ECR Repository already deleted${COLOR_OFF}\n"
+        printf "Delete ECR Repository \n"
+        
+        ECR_REPOSITORY_NAME=$(cat /tmp/tempconfig.log|grep -i ECR_REPOSITORY_NAME| cut -d "=" -f2)
+         aws ecr describe-repositories --repository-name $ECR_REPOSITORY >/dev/null 2>&1
+       
+        if [ $? = 0 ]; then
+            
+            printf "${IGREEN}Deleting ECR Repository: ${ECR_REPOSITORY_NAME}${COLOR_OFF}\n"
+            aws ecr delete-repository --repository-name ${ECR_REPOSITORY_NAME} --force
+           
+        else
+            printf "${IGREEN}ECR Repository already deleted${COLOR_OFF}\n"
+        fi
+        rm /tmp/tempconfig.log
     fi
     
     trap - EXIT
