@@ -69,8 +69,17 @@ spec:
       {{- if .Values.catalog.volume.enabled }}
       volumes:
       - name: {{ .Values.catalog.volume.name }}
+        {{ if .Values.catalog.volume.claim }}
         persistentVolumeClaim:
           claimName: {{ .Values.catalog.volume.claim }}
+        {{- end }}
+        {{ if .Values.catalog.volume.csi }}
+        csi:
+          driver: {{ .Values.catalog.volume.csi.driver }}
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: {{ .Values.catalog.volume.csi.volumeAttributes.secretProviderClass }}
+        {{- end }}
       {{- end }}
       {{- with .Values.catalog.nodeSelector }}
       nodeSelector:
