@@ -9,6 +9,6 @@ metadata:
 fargateProfiles:
   - name: fargate-productcatalog
     selectors:
-      - namespace: prodcatalog-ns
+      - namespace: workshop
         labels:
           app: prodcatalog
