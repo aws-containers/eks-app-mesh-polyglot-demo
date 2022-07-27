@@ -1,4 +1,4 @@
-This repository is used for many AWS EKS workshops
+This repository is used for many AWS EKS workshops in https://catalog.workshops.aws/eks-immersionday/en-US
 
 ## 1. Workshop on Polyglot Microservices in EKS
 
