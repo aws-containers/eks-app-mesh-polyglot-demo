@@ -5,8 +5,10 @@ metadata:
   namespace: {{ .Values.sku.namespace }}
   labels:
     app: {{ .Values.sku.name }}
+  {{- with .Values.sku.service.annotations }}
   annotations:
-    alb.ingress.kubernetes.io/healthcheck-path: /ping
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   type: {{ .Values.sku.service.type }}
   ports:

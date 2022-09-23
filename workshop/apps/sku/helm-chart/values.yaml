@@ -20,6 +20,8 @@ sku:
     targetPort: 3000
     port: 80
     name: "http"
+    annotations:
+      alb.ingress.kubernetes.io/healthcheck-path: /ping
 
   selector:
     app: sku
@@ -29,7 +31,7 @@ sku:
     annotations: 
       alb.ingress.kubernetes.io/scheme: internet-facing
       alb.ingress.kubernetes.io/target-type: ip
-      alb.ingress.kubernetes.io/group.name: product-mgmt
+      alb.ingress.kubernetes.io/group.name: product-catalog
     hosts:
       - host: 
         paths: [/sku]
