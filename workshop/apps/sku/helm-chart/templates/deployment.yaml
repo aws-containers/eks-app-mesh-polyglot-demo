@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.sku.name }}
+  namespace: {{ .Values.sku.namespace }}
+spec:
+  replicas: {{ .Values.sku.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.sku.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.sku.name }}
+    spec:
+      containers:
+        - name: {{ .Values.sku.name }}
+          image: "{{ .Values.sku.image.repository }}:{{ .Values.sku.image.tag }}"
+          imagePullPolicy: {{ .Values.sku.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.sku.service.targetPort }}
+              protocol: TCP
+          {{- if .Values.sku.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.sku.livenessProbe.path }}
+              port: {{ .Values.sku.livenessProbe.port }}
+            initialDelaySeconds: {{ .Values.sku.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.sku.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.sku.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.sku.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.sku.livenessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.sku.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.sku.readinessProbe.path }}
+              port: {{ .Values.sku.readinessProbe.port }}
+            initialDelaySeconds: {{ .Values.sku.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.sku.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.sku.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.sku.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.sku.readinessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.sku.startupProbe.enabled }}
+          startupProbe:
+            httpGet:
+              path: {{ .Values.sku.startupProbe.path }}
+              port: {{ .Values.sku.startupProbe.port }}
+            initialDelaySeconds: {{ .Values.sku.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.sku.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.sku.startupProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.sku.startupProbe.successThreshold }}
+            failureThreshold: {{ .Values.sku.startupProbe.failureThreshold }}
+          {{- end }}
+          env:
+            {{- toYaml .Values.sku.env | nindent 12 }}
+          resources:
+            {{- toYaml .Values.sku.resources | nindent 12 }}
+      {{- with .Values.sku.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.sku.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.sku.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

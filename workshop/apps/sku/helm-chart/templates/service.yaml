@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.sku.name }}
+  namespace: {{ .Values.sku.namespace }}
+  labels:
+    app: {{ .Values.sku.name }}
+  {{- with .Values.sku.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.sku.service.type }}
+  ports:
+    - port: {{ .Values.sku.service.port }}
+      name: {{ .Values.sku.service.name }}
+      targetPort: {{ .Values.sku.service.targetPort }}
+  selector:
+    app: {{ .Values.sku.name }}

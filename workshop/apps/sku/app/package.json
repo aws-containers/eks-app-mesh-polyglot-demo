@@ -1,0 +1,16 @@
+{
+  "name": "nodejs_app_2",
+  "version": "1.0.0",
+  "description": "sku detail",
+  "main": " app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ratnopam Chakrabarti",
+  "license": "MIT-0",
+  "dependencies": {
+    "aws-xray-sdk": "3.2.0",
+    "express": "^4.17.1",
+    "ejs": "^3.1.5"
+  }
+}

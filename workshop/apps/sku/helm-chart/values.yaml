@@ -1,0 +1,89 @@
+# Default values for helm-chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+sku:
+  replicaCount: 3
+  namespace: sku
+  name: sku
+
+  image:
+    repository: public.ecr.aws/e1x6y8e1/sku
+    tag: "5"
+    pullPolicy: Always
+
+  nameOverride: ""
+  fullnameOverride: ""
+
+  service:
+    type: ClusterIP
+    targetPort: 3000
+    port: 80
+    name: "http"
+    annotations:
+      alb.ingress.kubernetes.io/healthcheck-path: /ping
+
+  selector:
+    app: sku
+
+  ingress:
+    enabled: true
+    annotations: 
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/group.name: product-catalog
+    hosts:
+      - host: 
+        paths: [/sku]
+
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  livenessProbe:
+    enabled: true
+    path: /ping
+    port: 3000
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 1
+    failureThreshold: 3
+    successThreshold: 1
+  readinessProbe:
+    enabled: true
+    path: /ping
+    port: 3000
+    initialDelaySeconds: 5
+    periodSeconds: 3
+    timeoutSeconds: 1
+    failureThreshold: 3
+    successThreshold: 1
+  startupProbe:
+    enabled: false
+  #   port: 9000
+  #   path: /ping
+  #   initialDelaySeconds: 10
+  #   periodSeconds: 10
+  #   timeoutSeconds: 5
+  #   failureThreshold: 1
+  #   successThreshold: 1
+  
+    
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}

@@ -23,3 +23,4 @@ workshop/apps/catalog_detail/output.log
 workshop/apps/frontend_node/node_modules/
 workshop/apps/product_catalog/__pycache__/
 workshop/apps/product_catalog/venv/
+workshop/apps/sku/app/node_modules/
