@@ -14,10 +14,17 @@ WORKDIR /app
 COPY requirements.txt /app
 RUN pip install -r requirements.txt
 
+RUN opentelemetry-bootstrap --action=install
+
 COPY . /app
 
 # ENV AGG_APP_URL='http://prodinfo.octank-mesh-ns.svc.cluster.local:3000/productAgreement'
 
 #WORKDIR /docker_app
 EXPOSE 8080
-ENTRYPOINT ["/app/bootstrap.sh"]
+CMD opentelemetry-instrument \
+    # --traces_exporter=console \
+    --log_level=debug \
+    # --logs_exporter=console \
+    # --metrics_exporter=none \
+    python3 -m flask run -h 0.0.0.0
