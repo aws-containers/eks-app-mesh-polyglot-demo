@@ -33,9 +33,9 @@ spec:
       logging:
         loglevel: debug
       awsxray:
-        region: 'us-east-2'
+        region: ${AWS_REGION}
       awsemf:
-        region: 'us-east-2'
+        region: ${AWS_REGION}
     
     service:
       pipelines:
