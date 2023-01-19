@@ -8,10 +8,10 @@ from flask_cors import CORS
 import requests
 import os
 import logging
-from aws_xray_sdk.core import xray_recorder
-from aws_xray_sdk.ext.flask.middleware import XRayMiddleware
-xray_recorder.configure(context_missing='LOG_ERROR')
-from aws_xray_sdk.core import patch_all
+# from aws_xray_sdk.core import xray_recorder
+# from aws_xray_sdk.ext.flask.middleware import XRayMiddleware
+# xray_recorder.configure(context_missing='LOG_ERROR')
+# from aws_xray_sdk.core import patch_all
 
 flask_app = Flask(__name__)
 flask_app.debug = True
@@ -21,8 +21,8 @@ flask_app.logger.setLevel(log_level)
 CORS(flask_app, resources={r'/*': {'origins': '*'}})
 
 #configure SDK code
-xray_recorder.configure(service='Product-Catalog')
-XRayMiddleware(flask_app, xray_recorder)
+# xray_recorder.configure(service='Product-Catalog')
+# XRayMiddleware(flask_app, xray_recorder)
 
 AGG_APP_URL = os.environ.get("AGG_APP_URL")
 
@@ -130,4 +130,4 @@ class MainClass(Resource):
             name_space.abort(400, e.__doc__, status = "Could not save information", statusCode = "400")
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", debug=True)
+    app.run(host="0.0.0.0", debug=True, use_reloader=False)
