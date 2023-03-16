@@ -58,7 +58,7 @@ spec:
             successThreshold: {{ .Values.frontend.startupProbe.successThreshold }}
             failureThreshold: {{ .Values.frontend.startupProbe.failureThreshold }}
           {{- end }}
-          {{- if .Values.frontend.security.enabled }}
+          {{- if .Values.frontend.security }}
           securityContext: 
             {{- toYaml .Values.frontend.securityContext | nindent 12}}
           {{- end }}
