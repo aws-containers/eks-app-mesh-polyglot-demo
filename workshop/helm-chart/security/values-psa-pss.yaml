@@ -1,0 +1,7 @@
+# Default values for helm-chart.
+frontend:
+  security:
+    enabled: true
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsUser: 1000

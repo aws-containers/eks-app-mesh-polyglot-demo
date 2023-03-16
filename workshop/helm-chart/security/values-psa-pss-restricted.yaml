@@ -1,0 +1,14 @@
+# Default values for helm-chart.
+frontend:
+  security:
+    enabled: true
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    readOnlyRootFilesystem: false
+    runAsNonRoot: true
+    runAsUser: 1000
+    seccompProfile:
+      type: RuntimeDefault
