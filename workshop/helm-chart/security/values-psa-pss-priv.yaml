@@ -1,0 +1,7 @@
+# Default values for helm-chart.
+frontend:
+  security:
+    enabled: true
+  securityContext:
+    privileged: true
+    runAsUser: 0
