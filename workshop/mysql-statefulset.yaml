@@ -31,9 +31,9 @@ spec:
           echo server-id=$((100 + $ordinal)) >> /mnt/conf.d/server-id.cnf
           # Copy appropriate conf.d files from config-map to emptyDir.
           if [[ $ordinal -eq 0 ]]; then
-            cp /mnt/config-map/master.cnf /mnt/conf.d/
+            cp /mnt/config-map/leader.cnf /mnt/conf.d/
           else
-            cp /mnt/config-map/slave.cnf /mnt/conf.d/
+            cp /mnt/config-map/follower.cnf /mnt/conf.d/
           fi
         volumeMounts:
         - name: conf
