@@ -15,6 +15,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
+  ingressClassName: alb
 {{- if .Values.sku.ingress.tls }}
   tls:
   {{- range .Values.sku.ingress.tls }}
